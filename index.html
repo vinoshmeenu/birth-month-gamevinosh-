@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birth Month Prediction - जानिए अपना स्वभाव और पार्टनर</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const PREDICTIONS = {
+      january: {
+        month: "January (जनवरी)",
+        emoji: "🌟",
+        text: "आप मेहनती और महत्वाकांक्षी हैं, लेकिन दिल के बहुत नरम हैं। आपकी GF Caring और Supportive होगी।",
+        color: "from-blue-500 to-indigo-600"
+      },
+      february: {
+        month: "February (फरवरी)",
+        emoji: "✨",
+        text: "आप क्रिएटिव और अलग सोचने वाले हैं। आपकी GF Stylish और Charming होगी।",
+        color: "from-purple-500 to-pink-600"
+      },
+      march: {
+        month: "March (मार्च)",
+        emoji: "😊",
+        text: "आप शांत स्वभाव के हैं, लेकिन समय आने पर सब संभाल लेते हैं। आपकी GF Sweet और Understanding होगी।",
+        color: "from-teal-500 to-emerald-600"
+      },
+      april: {
+        month: "April (अप्रैल)",
+        emoji: "🔥",
+        text: "आप एनर्जेटिक और निडर हैं। आपकी GF Bold और Attractive होगी।",
+        color: "from-orange-500 to-red-600"
+      },
+      may: {
+        month: "May (मई)",
+        emoji: "💖",
+        text: "आप प्रैक्टिकल हैं, लेकिन अपनों के लिए कुछ भी कर सकते हैं। आपकी GF Loyal और परिवार को साथ लेकर चलने वाली होगी।",
+        color: "from-pink-500 to-rose-600"
+      },
+      june: {
+        month: "June (जून)",
+        emoji: "😎",
+        text: "आप Flirty Nature के हैं, लेकिन दिल से अच्छे हैं। आपकी GF Smart होगी।",
+        color: "from-sky-500 to-blue-600"
+      },
+      july: {
+        month: "July (जुलाई)",
+        emoji: "❤️",
+        text: "आप बहुत Emotional और Loyal हैं। आपकी GF आपको बहुत प्यार करेगी।",
+        color: "from-red-500 to-rose-600"
+      },
+      august: {
+        month: "August (अगस्त)",
+        emoji: "👑",
+        text: "आप Attitude वाले हैं, लेकिन प्यार में ईमानदार हैं। आपकी GF Beautiful और Confident होगी।",
+        color: "from-amber-500 to-orange-600"
+      },
+      september: {
+        month: "September (सितंबर)",
+        emoji: "🧠",
+        text: "आप बहुत समझदार और भरोसेमंद हैं। आपकी GF Intelligent होगी।",
+        color: "from-indigo-500 to-purple-600"
+      },
+      october: {
+        month: "October (अक्टूबर)",
+        emoji: "💕",
+        text: "आप Romantic और Charming हैं। आपकी GF थोड़ी Possessive होगी।",
+        color: "from-fuchsia-500 to-pink-600"
+      },
+      november: {
+        month: "November (नवंबर)",
+        emoji: "🤝",
+        text: "आप आसानी से किसी पर भरोसा नहीं करते, लेकिन एक बार करें तो पूरी वफादारी निभाते हैं। आपकी GF Mature और Honest होगी।",
+        color: "from-slate-600 to-slate-800"
+      },
+      december: {
+        month: "December (दिसंबर)",
+        emoji: "🎉",
+        text: "आप मस्तीखोर हैं, लेकिन दिल के साफ हैं। आपकी GF Funny और Adventure पसंद करने वाली होगी।",
+        color: "from-emerald-500 to-green-600"
+      }
+    };
+
+    const MONTH_ALIASES = {
+      jan: "january", january: "january", "जनवरी": "january",
+      feb: "february", february: "february", "फरवरी": "february",
+      mar: "march", march: "march", "मार्च": "march",
+      apr: "april", april: "april", "अप्रैल": "april",
+      may: "may", "मई": "may",
+      jun: "june", june: "june", "जून": "june",
+      jul: "july", july: "july", "जुलाई": "july",
+      aug: "august", august: "august", "अगस्त": "august",
+      sep: "september", sept: "september", september: "september", "सितंबर": "september",
+      oct: "october", october: "october", "अक्टूबर": "october",
+      nov: "november", november: "november", "नवंबर": "november",
+      dec: "december", december: "december", "दिसंबर": "december"
+    };
+
+    function App() {
+      const [selectedKey, setSelectedKey] = useState(null);
+      const [inputText, setInputText] = useState("");
+      const [liked, setLiked] = useState(false);
+      const [likeCount, setLikeCount] = useState(248);
+      const [copied, setCopied] = useState(false);
+      const [comments, setComments] = useState([
+        { name: "Rahul Sharma", text: "June", reply: PREDICTIONS.june.text + " 😎" }
+      ]);
+
+      const handleCheck = (val) => {
+        const clean = val.trim().toLowerCase();
+        const foundKey = MONTH_ALIASES[clean];
+        if (foundKey) {
+          setSelectedKey(foundKey);
+          const pred = PREDICTIONS[foundKey];
+          setComments((prev) => [
+            { name: "आप (You)", text: val, reply: `${pred.text} ${pred.emoji}` },
+            ...prev
+          ]);
+        } else {
+          alert("कृपया सही महीने का नाम लिखें (जैसे: June, July, August या नीचे बटन दबाएं)");
+        }
+      };
+
+      const handleButtonClick = (key) => {
+        setSelectedKey(key);
+        setInputText(PREDICTIONS[key].month.split(" ")[0]);
+      };
+
+      const handleShare = () => {
+        const pred = PREDICTIONS[selectedKey];
+        const shareText = `मेरा जन्म का महीना ${pred.month} है:\n"${pred.text} ${pred.emoji}"\n\nअपना महीना चेक करने के लिए लिंक पर क्लिक करें: ${window.location.href}`;
+        navigator.clipboard.writeText(shareText);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      };
+
+      const activeResult = selectedKey ? PREDICTIONS[selectedKey] : null;
+
+      return (
+        <div className="min-h-screen pb-10">
+          {/* Top Facebook-Style Header */}
+          <header className="bg-white shadow-sm sticky top-0 z-10 px-4 py-2.5 flex items-center justify-between border-b border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-full bg-[#1877F2] flex items-center justify-center text-white font-bold text-2xl">
+                f
+              </div>
+              <span className="font-bold text-lg text-[#1877F2] tracking-tight">FunPredictions</span>
+            </div>
+            <span className="text-xs bg-blue-50 text-[#1877F2] font-semibold px-2.5 py-1 rounded-full">
+              Viral Post 🔥
+            </span>
+          </header>
+
+          {/* Main Feed Container */}
+          <main className="max-w-lg mx-auto mt-3 px-2 sm:px-0">
+            
+            {/* AD SLOT 1: भविष्य में यहाँ Adsterra/Monetag का बैनर कोड लगा सकते हैं */}
+            {/* <div id="top-ad-banner" className="mb-3 text-center"></div> */}
+
+            {/* Facebook Post Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              {/* Post Author Info */}
+              <div className="p-3.5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1877F2] to-blue-400 flex items-center justify-center text-white font-bold text-lg">
+                  ✨
+                </div>
+                <div>
+                  <h2 className="font-bold text-gray-900 text-sm leading-tight">
+                    जन्म का महीना और आपकी GF / स्वभाव 😎❤️
+                  </h2>
+                  <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                    Just now · 🌎 Public
+                  </p>
+                </div>
+              </div>
+
+              {/* Post Prompt Text */}
+              <div className="px-3.5 pb-3 text-gray-800 text-[15px]">
+                नीचे अपना <strong>Birth Month (जन्म का महीना)</strong> चुनें या लिखें और तुरंत अपना मजेदार रिजल्ट देखें! 👇
+              </div>
+
+              {/* Interactive Selection Area */}
+              <div className="bg-gray-50 p-3.5 border-y border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                  1. अपना महीना चुनें (Tap करें):
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {Object.keys(PREDICTIONS).map((key) => {
+                    const label = PREDICTIONS[key].month.split(" ")[0];
+                    const isSelected = selectedKey === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => handleButtonClick(key)}
+                        className={`py-2 px-2 rounded-lg text-xs font-bold transition-all ${
+                          isSelected
+                            ? "bg-[#1877F2] text-white shadow-md scale-105"
+                            : "bg-white text-gray-700 border border-gray-200 hover:bg-blue-50"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Result Card Display */}
+                {activeResult && (
+                  <div className={`mt-4 rounded-xl p-4 text-white bg-gradient-to-r ${activeResult.color} shadow-lg transition-all`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold uppercase tracking-wider bg-black/20 px-2.5 py-0.5 rounded-full">
+                        {activeResult.month}
+                      </span>
+                      <span className="text-2xl">{activeResult.emoji}</span>
+                    </div>
+                    <p className="text-base sm:text-lg font-semibold leading-snug mt-2">
+                      "{activeResult.text}"
+                    </p>
+                    <button
+                      onClick={handleShare}
+                      className="mt-3 w-full bg-white text-gray-900 font-bold text-xs py-2 rounded-lg shadow hover:bg-gray-100 transition"
+                    >
+                      {copied ? "✅ रिजल्ट कॉपी हो गया! अब WhatsApp/FB पर पेस्ट करें" : "📤 अपना रिजल्ट कॉपी करें और दोस्तों को शेयर करें"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Post Reactions Counter */}
+              <div className="px-3.5 py-2 flex items-center justify-between text-xs text-gray-500 border-b border-gray-100">
+                <div className="flex items-center gap-1">
+                  <span className="bg-[#1877F2] text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px]">👍</span>
+                  <span className="bg-red-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-[10px] -ml-1.5">❤️</span>
+                  <span className="ml-1">{likeCount}</span>
+                </div>
+                <div>{comments.length} Comments</div>
+              </div>
+
+              {/* Like / Comment Action Bar */}
+              <div className="grid grid-cols-2 py-1 border-b border-gray-200 text-gray-600 font-semibold text-sm">
+                <button
+                  onClick={() => {
+                    setLiked(!liked);
+                    setLikeCount((c) => (liked ? c - 1 : c + 1));
+                  }}
+                  className={`py-2 flex items-center justify-center gap-1.5 hover:bg-gray-50 ${
+                    liked ? "text-[#1877F2]" : ""
+                  }`}
+                >
+                  👍 {liked ? "Liked" : "Like"}
+                </button>
+                <button
+                  onClick={() => document.getElementById("comment-input").focus()}
+                  className="py-2 flex items-center justify-center gap-1.5 hover:bg-gray-50"
+                >
+                  💬 Comment
+                </button>
+              </div>
+
+              {/* Comment Box Simulation */}
+              <div className="p-3.5 bg-white">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!inputText.trim()) return;
+                    handleCheck(inputText);
+                    setInputText("");
+                  }}
+                  className="flex gap-2 mb-3"
+                >
+                  <input
+                    id="comment-input"
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="कमेंट में अपना महीना लिखें (जैसे: July)..."
+                    className="flex-1 bg-[#f0f2f5] rounded-full px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1877F2]"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[#1877F2] text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-blue-600"
+                  >
+                    देखें
+                  </button>
+                </form>
+
+                {/* Auto-Reply Comments Feed */}
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {comments.map((c, i) => (
+                    <div key={i} className="text-sm">
+                      <div className="bg-[#f0f2f5] rounded-2xl px-3 py-2 inline-block">
+                        <p className="font-bold text-xs text-gray-900">{c.name}</p>
+                        <p className="text-gray-800">{c.text}</p>
+                      </div>
+                      {/* Bot Auto-Reply */}
+                      <div className="ml-6 mt-1.5 bg-blue-50 border border-blue-100 rounded-2xl px-3 py-2">
+                        <p className="font-bold text-xs text-[#1877F2] flex items-center gap-1">
+                          FunPredictions Bot <span className="text-[10px] bg-blue-200 px-1.5 rounded">Auto-Reply</span>
+                        </p>
+                        <p className="text-gray-800 text-xs mt-0.5">{c.reply}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Disclaimer */}
+            <p className="text-center text-[11px] text-gray-400 mt-4 px-4">
+              नोट: ये सब मनोरंजन के लिए मजेदार Predictions हैं, वैज्ञानिक भविष्यवाणी नहीं।
+            </p>
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
